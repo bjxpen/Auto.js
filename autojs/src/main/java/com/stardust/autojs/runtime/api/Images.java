@@ -350,13 +350,13 @@ public class Images {
         Context context = currentActivity == null ? mContext : currentActivity;
         mScriptRuntime.console.info("opencv initializing");
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            OpenCVHelper.initIfNeeded(context, () -> {
+            OpenCVHelper.initIfNeededv2(context, () -> {
                 mOpenCvInitialized = true;
                 mScriptRuntime.console.info("opencv initialized");
             });
         } else {
             VolatileDispose<Boolean> result = new VolatileDispose<>();
-            OpenCVHelper.initIfNeeded(context, () -> {
+            OpenCVHelper.initIfNeededv2(context, () -> {
                 mOpenCvInitialized = true;
                 result.setAndNotify(true);
                 mScriptRuntime.console.info("opencv initialized");

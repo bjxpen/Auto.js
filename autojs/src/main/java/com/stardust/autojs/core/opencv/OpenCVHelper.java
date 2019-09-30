@@ -12,6 +12,7 @@ import com.stardust.app.DialogUtils;
 
 import org.opencv.android.InstallCallbackInterface;
 import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.OpenCVLoader;
 
 
@@ -62,6 +63,46 @@ public class OpenCVHelper {
         } else {
             OpenCVLoader.initDebug();
             callback.onInitFinish();
+        }
+    }
+
+    public synchronized static void initIfNeededv2(Context context, InitializeCallback callback) {
+        if (sInitialized) {
+            callback.onInitFinish();
+            return;
+        }
+        sInitialized = true;
+
+        BaseLoaderCallback loaderCallback = new BaseLoaderCallback(context) {
+            @Override
+            public void onManagerConnected(int status) {
+                switch (status) {
+                    case LoaderCallbackInterface.SUCCESS: {
+                        callback.onInitFinish();
+                    }
+                    break;
+                    default: {
+                        super.onManagerConnected(status);
+                    }
+                    break;
+                }
+            }
+        };
+
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            new Thread(() -> {
+                if (OpenCVLoader.initDebug()) {
+                    loaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+                } else {
+                    OpenCVLoader.initAsync("3.4.3", context, loaderCallback);
+                }
+            }).start();
+        } else {
+            if (OpenCVLoader.initDebug()) {
+                loaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+            } else {
+                OpenCVLoader.initAsync("3.4.3", context, loaderCallback);
+            }
         }
     }
 }
